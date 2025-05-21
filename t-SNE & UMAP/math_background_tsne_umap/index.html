@@ -1,0 +1,863 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../../DNN/dnn/">
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>Mathematical foundations of t-SNE and UMAP - MNIST Classification</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mathematical-foundations-of-t-sne-and-umap" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="MNIST Classification" class="md-header__button md-logo" aria-label="MNIST Classification" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            MNIST Classification
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Mathematical foundations of t-SNE and UMAP
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple"  aria-label="Switch to Dark Mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to Dark Mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="lime"  aria-label="Switch to Light Mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to Light Mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  MNIST-classification
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../DNN/dnn/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Deep Neural Networks
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Mathematical foundations of t-SNE and UMAP
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="MNIST Classification" class="md-nav__button md-logo" aria-label="MNIST Classification" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    MNIST Classification
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MNIST-classification
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DNN/dnn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deep Neural Networks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Mathematical foundations of t-SNE and UMAP
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Mathematical foundations of t-SNE and UMAP
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-t-sne-t-distributed-stochastic-neighbor-embedding" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. t-SNE: t-Distributed Stochastic Neighbor Embedding
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. t-SNE: t-Distributed Stochastic Neighbor Embedding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-level-idea" class="md-nav__link">
+    <span class="md-ellipsis">
+      High-Level Idea
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-by-step-math-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step-by-step math breakdown
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-by-step math breakdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-compute-pairwise-similarities-in-high-dimensional-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: Compute pairwise similarities in high-dimensional space
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-compute-similarities-in-low-dimensional-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Compute similarities in low-dimensional space
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-minimize-kl-divergence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Minimize KL Divergence
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary-of-t-sne-math" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary of t-SNE Math:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-umap-uniform-manifold-approximation-and-projection" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. UMAP: Uniform Manifold Approximation and Projection
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. UMAP: Uniform Manifold Approximation and Projection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-construct-fuzzy-topological-representation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: Construct Fuzzy Topological Representation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Construct Fuzzy Topological Representation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-metric-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Metric Estimation:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-create-low-dimensional-graph-with-similar-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Create Low-Dimensional Graph with Similar Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-optimize-layout-using-cross-entropy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Optimize Layout Using Cross-Entropy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary-of-umap-math" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary of UMAP Math:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-table-t-sne-vs-umap-mathematically" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comparison Table: t-SNE vs UMAP (Mathematically)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-notes-on-mnist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Notes on MNIST
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#coming-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      Coming up
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="mathematical-foundations-of-t-sne-and-umap">Mathematical foundations of <strong>t-SNE</strong> and <strong>UMAP</strong></h1>
+<h2 id="1-t-sne-t-distributed-stochastic-neighbor-embedding">1. t-SNE: t-Distributed Stochastic Neighbor Embedding</h2>
+<h3 id="high-level-idea">High-Level Idea</h3>
+<p>t-SNE converts similarities between data points into probabilities and tries to minimize the difference between these probabilities in high-dimensional and low-dimensional spaces.</p>
+<h3 id="step-by-step-math-breakdown">Step-by-step math breakdown</h3>
+<h4 id="step-1-compute-pairwise-similarities-in-high-dimensional-space">Step 1: Compute pairwise similarities in high-dimensional space</h4>
+<p>We define a <strong>conditional probability</strong> $ p_{j|i} $ that represents the similarity of point $ x_j $ to point $ x_i $. This is based on a <strong>Gaussian distribution centered at $ x_i $</strong>:</p>
+<div class="arithmatex">\[
+p_{j|i} = \frac{\exp\left(-||x_i - x_j||^2 / (2\sigma_i^2)\right)}{\sum_{k \neq i} \exp\left(-||x_i - x_k||^2 / (2\sigma_i^2)\right)}
+\]</div>
+<ul>
+<li>$ \sigma_i $ is chosen per point $ i $ so that the entropy of $ p_{j|i} $ matches a user-defined <strong>perplexity</strong>.</li>
+<li>Perplexity roughly corresponds to a guess of the number of neighbors around each point.</li>
+</ul>
+<p>Then, we symmetrize this into a joint probability:</p>
+<div class="arithmatex">\[
+p_{ij} = \frac{p_{j|i} + p_{i|j}}{2N}
+\]</div>
+<p>This gives us an $ N \times N $ matrix of similarities.</p>
+<h4 id="step-2-compute-similarities-in-low-dimensional-space">Step 2: Compute similarities in low-dimensional space</h4>
+<p>In the low-dimensional embedding (say 2D), we compute a similar probability $ q_{ij} $, but now using a <strong>Student’s t-distribution with 1 degree of freedom</strong> (which becomes a Cauchy distribution):</p>
+<div class="arithmatex">\[
+q_{ij} = \frac{(1 + ||y_i - y_j||^2)^{-1}}{\sum_{k \neq l} (1 + ||y_k - y_l||^2)^{-1}}
+\]</div>
+<p>This heavy-tailed distribution helps avoid the <strong>crowding problem</strong> — where many points crowd together in lower dimensions when using Gaussian distributions.</p>
+<h4 id="step-3-minimize-kl-divergence">Step 3: Minimize KL Divergence</h4>
+<p>We minimize the <strong>Kullback-Leibler divergence</strong> between the two distributions $ P $ and $ Q $:</p>
+<div class="arithmatex">\[
+KL(P || Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}
+\]</div>
+<p>This cost function is minimized via <strong>gradient descent</strong>:</p>
+<div class="arithmatex">\[
+\frac{\partial KL}{\partial y_i} = 4 \sum_j (p_{ij} - q_{ij})(y_i - y_j)(1 + ||y_i - y_j||^2)^{-1}
+\]</div>
+<hr />
+<h4 id="summary-of-t-sne-math">Summary of t-SNE Math:</h4>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Compute Gaussian-based similarities in high-D</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Compute t-distribution-based similarities in low-D</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Minimize KL-divergence between the two distributions</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-umap-uniform-manifold-approximation-and-projection">2. UMAP: Uniform Manifold Approximation and Projection</h2>
+<p>UMAP is inspired by <strong>topology and Riemannian geometry</strong>, assuming that data lies on a <strong>low-dimensional manifold</strong> embedded in high-dimensional space.</p>
+<p>It constructs a topological representation of the data and finds a low-dimensional layout that preserves this structure.</p>
+<h3 id="step-1-construct-fuzzy-topological-representation">Step 1: Construct Fuzzy Topological Representation</h3>
+<p>UMAP builds a <strong>fuzzy simplicial complex</strong> over the data:</p>
+<h4 id="local-metric-estimation">Local Metric Estimation:</h4>
+<p>For each point $ x_i $, UMAP estimates a local scale $ \rho_i $, which is the distance to its nearest neighbor.</p>
+<p>Then, for each pair $ (x_i, x_j) $, it computes a fuzzy membership value:</p>
+<div class="arithmatex">\[
+w_{ij} = \exp\left( - \frac{||x_i - x_j|| - \rho_i}{\sigma_i} \right)
+\]</div>
+<ul>
+<li>$ \rho_i $: distance to nearest neighbor → captures local density</li>
+<li>$ \sigma_i $: scaling factor set such that the sum of weights approximates a desired local connectivity</li>
+</ul>
+<p>This results in a <strong>directed graph</strong> where edge weights represent "fuzzy" proximity.</p>
+<p>To make it undirected, UMAP combines forward and reverse edges:</p>
+<div class="arithmatex">\[
+p_{ij} = w_{ij} + w_{ji} - w_{ij} \cdot w_{ji}
+\]</div>
+<h3 id="step-2-create-low-dimensional-graph-with-similar-structure">Step 2: Create Low-Dimensional Graph with Similar Structure</h3>
+<p>UMAP then creates a similar fuzzy simplicial complex in the low-dimensional space using a different kernel:</p>
+<div class="arithmatex">\[
+q_{ij} = (1 + a ||y_i - y_j||^{2b})^{-1}
+\]</div>
+<ul>
+<li>Parameters $ a $ and $ b $ are typically learned or set heuristically.</li>
+<li>The idea is to preserve the same kind of <strong>connectivity</strong> as in the high-dimensional space.</li>
+</ul>
+<h3 id="step-3-optimize-layout-using-cross-entropy">Step 3: Optimize Layout Using Cross-Entropy</h3>
+<p>Instead of KL-divergence like t-SNE, UMAP minimizes <strong>cross-entropy</strong> between the two fuzzy graphs:</p>
+<div class="arithmatex">\[
+CE(P, Q) = \sum_{i \neq j} \left[ p_{ij} \log \frac{p_{ij}}{q_{ij}} + (1 - p_{ij}) \log \frac{1 - p_{ij}}{1 - q_{ij}} \right]
+\]</div>
+<p>This loss encourages both:
+- Attraction between nearby points (via $ p_{ij} \log \frac{p_{ij}}{q_{ij}} $)
+- Repulsion between distant points (via $ (1 - p_{ij}) \log \frac{1 - p_{ij}}{1 - q_{ij}} $)</p>
+<p>UMAP uses <strong>stochastic gradient descent</strong> to optimize this efficiently.</p>
+<h3 id="summary-of-umap-math">Summary of UMAP Math:</h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Build a fuzzy graph based on local distances</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Model low-dimensional layout with a similar graph</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Minimize cross-entropy between graphs</td>
+</tr>
+</tbody>
+</table>
+<h2 id="comparison-table-t-sne-vs-umap-mathematically">Comparison Table: t-SNE vs UMAP (Mathematically)</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>t-SNE</th>
+<th>UMAP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Goal</td>
+<td>Preserve local neighbor relationships</td>
+<td>Preserve both local and global structure</td>
+</tr>
+<tr>
+<td>Similarity Measure</td>
+<td>Gaussian (high-D), t-distribution (low-D)</td>
+<td>Fuzzy sets with exponential decay</td>
+</tr>
+<tr>
+<td>Optimization Objective</td>
+<td>KL-divergence</td>
+<td>Cross-entropy</td>
+</tr>
+<tr>
+<td>Distance Preservation</td>
+<td>Poorly preserved globally</td>
+<td>Better preserved globally</td>
+</tr>
+<tr>
+<td>Randomness</td>
+<td>Depends on initialization</td>
+<td>Deterministic with fixed seed</td>
+</tr>
+<tr>
+<td>Speed</td>
+<td>Slower</td>
+<td>Faster due to graph-based optimization</td>
+</tr>
+</tbody>
+</table>
+<h2 id="practical-notes-on-mnist">Practical Notes on MNIST</h2>
+<p>When applied to MNIST:
+- <strong>t-SNE</strong> tends to produce compact clusters with clear separation between digit classes, but may not show how clusters relate to each other.
+- <strong>UMAP</strong> often shows more meaningful spacing between clusters (e.g., 0 near 6/9, 1 far from 8), and sometimes reveals substructures within clusters (e.g., variations in how people write digits).</p>
+<h2 id="coming-up">Coming up</h2>
+<ul>
+<li>For <strong>t-SNE</strong>: perplexity, early exaggeration, and gradient descent steps.</li>
+<li>For <strong>UMAP</strong>: The role of Riemannian manifolds, fuzzy topological structures, and spectral graph theory.</li>
+</ul>
+
+
+
+
+
+
+
+
+  <aside class="md-source-file">
+    
+    
+    
+      
+  
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Contributors">
+      
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg>
+      
+    </span>
+    <nav>
+      
+        <a href="mailto:thenewthinktank@users.noreply.github.com">Gustav Rasmussen</a>
+    </nav>
+  </span>
+
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/TheNewThinkTank-AI/mnist-classifier" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M186.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M480 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
